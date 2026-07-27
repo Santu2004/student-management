@@ -1,29 +1,23 @@
 import { useEffect, useState } from "react";
-
-import {
-  getStudents,
-  addStudent,
-  updateStudent,
-  deleteStudent,
-} from "../services/studentService";
-
+import api from "../api/axios";
 import StudentForm from "../components/StudentForm";
 import StudentList from "../components/StudentList";
 
-function Home() {
+const Home = () => {
   const [students, setStudents] = useState([]);
   const [editingStudent, setEditingStudent] = useState(null);
 
-  // Fetch Students
+  // Fetch all students
   const fetchStudents = async () => {
     try {
-      const data = await getStudents();
-      setStudents(data);
+      const response = await api.get("/students");
+      setStudents(response.data);
     } catch (error) {
       console.log(error);
     }
   };
 
+  // Load students when page opens
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -32,10 +26,10 @@ function Home() {
   const handleSubmit = async (studentData) => {
     try {
       if (editingStudent) {
-        await updateStudent(editingStudent._id, studentData);
+        await api.put(`/students/${editingStudent._id}`, studentData);
         setEditingStudent(null);
       } else {
-        await addStudent(studentData);
+        await api.post("/students", studentData);
       }
 
       fetchStudents();
@@ -52,7 +46,7 @@ function Home() {
   // Delete Student
   const handleDelete = async (id) => {
     try {
-      await deleteStudent(id);
+      await api.delete(`/students/${id}`);
       fetchStudents();
     } catch (error) {
       console.log(error);
@@ -61,7 +55,7 @@ function Home() {
 
   return (
     <div className="container">
-      <h1>Student Management</h1>
+      <h1>Student Management System</h1>
 
       <StudentForm
         onSubmit={handleSubmit}
@@ -75,6 +69,6 @@ function Home() {
       />
     </div>
   );
-}
+};
 
 export default Home;
